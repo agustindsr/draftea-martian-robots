@@ -1,6 +1,8 @@
 package entity
 
-import "fmt"
+import (
+	"fmt"
+)
 
 type Orientation string
 
@@ -18,10 +20,10 @@ var availableOrientations = map[string]Orientation{
 	"W": West,
 }
 
-func NewOrientation(orientation string) Orientation {
+func NewOrientation(orientation string) (*Orientation, error) {
 	if o, ok := availableOrientations[orientation]; ok {
-		return o
+		return &o, nil
 	}
 
-	panic(fmt.Sprintf("invalid orientation %s", orientation))
+	return nil, fmt.Errorf("invalid orientation: %s", orientation)
 }

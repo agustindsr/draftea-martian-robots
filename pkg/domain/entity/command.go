@@ -1,6 +1,8 @@
 package entity
 
-import "fmt"
+import (
+	"fmt"
+)
 
 type Command string
 
@@ -16,10 +18,10 @@ var availableCommands = map[string]Command{
 	"R": TurnRight,
 }
 
-func NewCommand(c string) Command {
-	if command, ok := availableCommands[c]; ok {
-		return command
+func NewCommand(command string) (*Command, error) {
+	if c, ok := availableCommands[command]; ok {
+		return &c, nil
 	}
 
-	panic(fmt.Sprintf("invalid Command %s", c))
+	return nil, fmt.Errorf("invalid command: %s", command)
 }

@@ -1,12 +1,8 @@
 package entity
 
-type Robot interface {
-	ExecuteCommands()
-	Position() Position
-	IsLost() bool
-}
+import "fmt"
 
-type robot struct {
+type Robot struct {
 	isLost   bool
 	position Position
 	commands []Command
@@ -14,20 +10,20 @@ type robot struct {
 }
 
 func NewRobot(position Position, commands []Command, planet *Planet) Robot {
-	return &robot{
+	return Robot{
 		commands: commands,
 		position: position,
 		planet:   planet,
 	}
 }
 
-func (r robot) IsLost() bool {
+func (r Robot) IsLost() bool {
 	return r.isLost
 }
 
-func (r *robot) ExecuteCommands() {
+func (r *Robot) ExecuteCommands() {
 	for _, c := range r.commands {
-		if r.planet.IsScented(r.position, c) {
+		if r.planet.isScented(r.position, c) {
 			continue
 		}
 
@@ -40,27 +36,23 @@ func (r *robot) ExecuteCommands() {
 			np = r.turnLeft()
 		case TurnRight:
 			np = r.turnRight()
-
-		default:
-			panic("unknown Command")
 		}
 
-		if !r.isInPlanet(np) {
+		if !r.planet.isInPlanet(np) {
 			r.planet.scents = append(r.planet.scents, scent{r.position, c})
 			r.isLost = true
 			break
 		}
 
 		r.position = np
-
 	}
 }
 
-func (r robot) Position() Position {
+func (r Robot) Position() Position {
 	return r.position
 }
 
-func (r robot) moveForward() Position {
+func (r Robot) moveForward() Position {
 	switch r.position.orientation {
 	case North:
 		r.position.y++
@@ -70,14 +62,12 @@ func (r robot) moveForward() Position {
 		r.position.y--
 	case West:
 		r.position.x--
-	default:
-		panic("unknown orientation")
 	}
 
 	return r.position
 }
 
-func (r robot) turnLeft() Position {
+func (r Robot) turnLeft() Position {
 	switch r.position.orientation {
 	case North:
 		r.position.orientation = West
@@ -87,14 +77,12 @@ func (r robot) turnLeft() Position {
 		r.position.orientation = East
 	case West:
 		r.position.orientation = South
-	default:
-		panic("unknown orientation")
 	}
 
 	return r.position
 }
 
-func (r *robot) turnRight() Position {
+func (r *Robot) turnRight() Position {
 	switch r.position.orientation {
 	case North:
 		r.position.orientation = East
@@ -104,13 +92,15 @@ func (r *robot) turnRight() Position {
 		r.position.orientation = West
 	case West:
 		r.position.orientation = North
-	default:
-		panic("unknown orientation")
 	}
 
 	return r.position
 }
 
-func (r *robot) isInPlanet(Position Position) bool {
-	return Position.x >= 0 && Position.x <= r.planet.width && r.position.y >= 0 && Position.y <= r.planet.height
+func (r Robot) String() string {
+	if r.IsLost() {
+		return fmt.Sprintf("%s LOST \n", r.position.String())
+	} else {
+		return fmt.Sprintf("%s \n", r.position.String())
+	}
 }

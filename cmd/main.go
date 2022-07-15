@@ -2,8 +2,7 @@ package main
 
 import (
 	"fmt"
-	"log"
-	"martian-robots/pkg/domain/matianrobot"
+	"martian-robots/pkg/domain/martianrobot"
 	"os"
 	"path/filepath"
 )
@@ -11,33 +10,48 @@ import (
 const inputPath = "./data/input.txt"
 
 func main() {
-	path, err := filepath.Abs(inputPath)
+	f, err := readInput(inputPath)
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
+	}
+
+	mr := martianrobot.NewService()
+
+	robots, err := mr.InitRobots(f)
+	if err != nil {
+		panic(err)
+	}
+
+	for _, r := range robots {
+		r.ExecuteCommands()
+
+		fmt.Print(r.String())
+	}
+}
+
+func readInput(path string) (string, error) {
+	path, err := filepath.Abs(path)
+	if err != nil {
+		return "", err
 	}
 
 	f, err := os.Open(path)
 	if err != nil {
-		log.Fatal(err)
+		return "", err
 	}
-	defer f.Close()
 
-	mr, err := matianrobot.NewService(f)
+	fileInfo, err := f.Stat()
 	if err != nil {
-		log.Fatal(err)
+		return "", err
 	}
 
-	for _, r := range mr.Robots {
-		r.ExecuteCommands()
+	filesize := fileInfo.Size()
+	buffer := make([]byte, filesize)
 
-		fp := r.Position()
-
-		msg := fmt.Sprintf("%d %d %s", fp.X(), fp.Y(), fp.Orientation())
-
-		if r.IsLost() {
-			log.Printf("%s LOST \n", msg)
-		} else {
-			log.Printf("%s \n", msg)
-		}
+	_, err = f.Read(buffer)
+	if err != nil {
+		return "", err
 	}
+
+	return string(buffer), nil
 }

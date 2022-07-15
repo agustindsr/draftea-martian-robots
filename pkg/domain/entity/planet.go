@@ -1,24 +1,31 @@
 package entity
 
 type Planet struct {
+	point
 	scents []scent
-	width  int
-	height int
 }
 
-func NewPlanet(width int, height int) *Planet {
-	return &Planet{
-		width:  width,
-		height: height,
+func NewPlanet(x int, y int) (*Planet, error) {
+	point, err := NewPoint(x, y)
+	if err != nil {
+		return nil, err
 	}
+
+	return &Planet{
+		point: *point,
+	}, nil
 }
 
-func (p Planet) IsScented(Position Position, command Command) bool {
+func (p Planet) isScented(position Position, command Command) bool {
 	for _, scent := range p.scents {
-		if scent.Position.x == Position.x && scent.Position.y == Position.y && Position.orientation == scent.Position.orientation && scent.Command == command {
+		if scent.Position.x == position.x && scent.Position.y == position.y && position.orientation == scent.Position.orientation && scent.Command == command {
 			return true
 		}
 	}
 
 	return false
+}
+
+func (p Planet) isInPlanet(position Position) bool {
+	return position.x >= 0 && position.x <= p.point.x && position.y >= 0 && position.y <= p.point.y
 }

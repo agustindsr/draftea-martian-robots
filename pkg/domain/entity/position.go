@@ -1,27 +1,26 @@
 package entity
 
+import (
+	"fmt"
+)
+
 type Position struct {
-	x           int
-	y           int
+	point
 	orientation Orientation
 }
 
-func NewPosition(x int, y int, orientation Orientation) Position {
-	return Position{
-		x:           x,
-		y:           y,
-		orientation: orientation,
+func NewPosition(x int, y int, orientation Orientation) (*Position, error) {
+	point, err := NewPoint(x, y)
+	if err != nil {
+		return nil, err
 	}
+
+	return &Position{
+		point:       *point,
+		orientation: orientation,
+	}, nil
 }
 
-func (p Position) Orientation() Orientation {
-	return p.orientation
-}
-
-func (p Position) X() int {
-	return p.x
-}
-
-func (p Position) Y() int {
-	return p.y
+func (p Position) String() string {
+	return fmt.Sprintf("%d %d %s", p.x, p.y, p.orientation)
 }
